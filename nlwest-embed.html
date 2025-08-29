@@ -88,10 +88,22 @@
   const body = document.querySelector(".body");
   if (!json) { body.innerHTML = `<div class="error">Standings temporarily unavailable.</div>`; return; }
 
-  const rec = (json.records || []).find(r =>
-    /west/i.test((r.division && r.division.name) || "") &&
-    /national/i.test((r.league && r.league.name) || "")
-  );
+// Prefer the division block that actually includes LAD or SD.
+// Fallbacks keep old behavior and then pick the first records block.
+const records = Array.isArray(json.records) ? json.records : [];
+const rec =
+  // primary: any block whose teamRecords include LAD (119) or SD (135)
+  records.find(r => (r.teamRecords || []).some(tr =>
+    tr?.team?.abbreviation === 'LAD' || tr?.team?.abbreviation === 'SD' ||
+    tr?.team?.id === 119 || tr?.team?.id === 135
+  )) ||
+  // secondary: division/league name match (works when API names are stable)
+  records.find(r =>
+    /west/i.test(r?.division?.name || '') && /national/i.test(r?.league?.name || '')
+  ) ||
+  // last resort: first block (avoids empty render on unexpected shapes)
+  records[0];
+
   if (!rec || !rec.teamRecords) { body.innerHTML = `<div class="error">NL West not found.</div>`; return; }
 
   const rows = rec.teamRecords;
