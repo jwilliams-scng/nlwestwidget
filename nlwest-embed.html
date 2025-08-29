@@ -8,7 +8,7 @@
   :root{color-scheme:light only}
   html,body{margin:0;padding:0}
   body{padding:12px;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  .wrap{max-width:720px;margin:0 auto}
+  .wrap{max-width:740px;margin:0 auto}
   .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden}
   header{display:flex;justify-content:space-between;align-items:center;padding:12px;background:linear-gradient(90deg,var(--p,#0d47a1),var(--a,#1976d2));color:#fff}
   header h3{margin:0;font-size:16px;letter-spacing:.2px;font-weight:800}
@@ -38,40 +38,46 @@
 
 <script>
 (async () => {
-  // --- Brand color by parent domain (or ?brand= param) ---
+  // --- Auto-brand: detect parent domain via referrer; fallback to ?brand= ---
   const brandMap = {
-    "www.dailynews.com":"ladn",
-    "www.ocregister.com":"ocr",
-    "www.sgvtribune.com":"sgv",
-    "www.dailybreeze.com":"db",
-    "www.presstelegram.com":"pt",
-    "www.sbsun.com":"sbs",
-    "www.dailybulletin.com":"ivdb",
-    "www.pasadenastarnews.com":"psn",
-    "www.whittierdailynews.com":"wdn",
-    "www.dailypilot.com":"dp"
+    'dailynews.com':'ladn',
+    'ocregister.com':'ocr',
+    'sgvtribune.com':'sgv',
+    'dailybreeze.com':'db',
+    'presstelegram.com':'pt',
+    'sbsun.com':'sbs',
+    'dailybulletin.com':'ivdb',
+    'pasadenastarnews.com':'psn',
+    'whittierdailynews.com':'wdn',
+    'dailypilot.com':'dp'
   };
-  const colors = {
+  const brandColors = {
     ladn:['#0d47a1','#1976d2'], ocr:['#0b3d91','#1e88e5'], sgv:['#334155','#64748b'],
     db:['#0f766e','#14b8a6'],   pt:['#1f2937','#4b5563'],   sbs:['#7c2d12','#ea580c'],
     ivdb:['#3b0764','#7c3aed'], psn:['#111827','#374151'], wdn:['#27272a','#52525b'],
     dp:['#1e3a8a','#2563eb'],  default:['#0d47a1','#1976d2']
   };
   const qs = new URLSearchParams(location.search);
-  const qsBrand = qs.get("brand");
-  let host = ""; try { host = new URL(document.referrer).host; } catch(e){}
-  const brand = qsBrand || brandMap[host] || "default";
-  const [p,a] = colors[brand] || colors.default;
-  document.documentElement.style.setProperty("--p", p);
-  document.documentElement.style.setProperty("--a", a);
+  const qsBrand = (qs.get('brand') || '').toLowerCase();
+
+  let host = '';
+  try {
+    host = new URL(document.referrer).hostname.toLowerCase().replace(/^www\./,'');
+  } catch(e) {}
+
+  const detected = brandMap[host];
+  const brand = (qsBrand || detected || 'default');
+  const [p,a] = brandColors[brand] || brandColors.default;
+  document.documentElement.style.setProperty('--p', p);
+  document.documentElement.style.setProperty('--a', a);
 
   // --- Header meta (season + timestamp) ---
-  const meta = document.querySelector(".meta");
+  const meta = document.querySelector('.meta');
   const now = new Date();
   const season = now.getFullYear();
   meta.textContent = `${season} • Updated ${now.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})}`;
 
-  // --- Fetch MLB standings (National League) ---
+  // --- Fetch MLB standings (NL) ---
   const urls = [
     `https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=${season}&standingsType=regularSeason`,
     `https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=${season}`
@@ -79,33 +85,32 @@
   let json = null;
   for (const u of urls) {
     try {
-      const r = await fetch(u, {mode:"cors", credentials:"omit"});
+      const r = await fetch(u, {mode:'cors', credentials:'omit'});
       if (!r.ok) continue;
       const j = await r.json();
       if (j && j.records) { json = j; break; }
     } catch(_) {}
   }
-  const body = document.querySelector(".body");
+
+  const body = document.querySelector('.body');
   if (!json) { body.innerHTML = `<div class="error">Standings temporarily unavailable.</div>`; return; }
 
-  // --- Robust: pick the records block that actually contains LAD (119) or SD (135) ---
+  // --- Robust: pick the block that actually includes LAD (119) or SD (135) ---
   const records = Array.isArray(json.records) ? json.records : [];
   const rec =
     records.find(r => (r.teamRecords || []).some(tr =>
       tr?.team?.abbreviation === 'LAD' || tr?.team?.abbreviation === 'SD' ||
       tr?.team?.id === 119 || tr?.team?.id === 135
     )) ||
-    records.find(r =>
-      /west/i.test(r?.division?.name || '') && /national/i.test(r?.league?.name || '')
-    ) ||
+    records.find(r => /west/i.test(r?.division?.name || '') && /national/i.test(r?.league?.name || '')) ||
     records[0];
 
   if (!rec || !rec.teamRecords) { body.innerHTML = `<div class="error">NL West not found.</div>`; return; }
 
   const rows = rec.teamRecords;
   const find = (needle) => rows.find(tr => String(tr?.team?.id)===String(needle) || tr?.team?.abbreviation===needle);
-  const dodgers = ["119","LAD"].map(find).find(Boolean);
-  const padres  = ["135","SD"].map(find).find(Boolean);
+  const dodgers = ['119','LAD'].map(find).find(Boolean);
+  const padres  = ['135','SD' ].map(find).find(Boolean);
 
   const pct = (w,l) => (w+l) ? (w/(w+l)).toFixed(3).replace(/^0/,'') : '—';
   const gb  = (tr) => (tr && tr.gamesBack != null) ? tr.gamesBack : '—';
@@ -118,7 +123,7 @@
         </thead>
         <tbody>
           ${rows.map((tr,i)=>`
-            <tr class="${(tr?.team?.id==119||tr?.team?.id==135||tr?.team?.abbreviation=='LAD'||tr?.team?.abbreviation=='SD')?'focus':''}">
+            <tr class="${(tr?.team?.id==119||tr?.team?.id==135||tr?.team?.abbreviation==='LAD'||tr?.team?.abbreviation==='SD')?'focus':''}">
               <td>${i+1}</td>
               <td>${tr?.team?.name || tr?.team?.abbreviation || '—'}</td>
               <td>${tr?.wins ?? '—'}</td>
@@ -139,7 +144,7 @@
     const diffRaw = (dW-dL) - (pW-pL);
     const ahead = diffRaw>0 ? 'Dodgers' : diffRaw<0 ? 'Padres' : 'Even';
     const diff = Math.abs(diffRaw)/2;
-    const dRemain = Math.max(0, 162 - dW - dL);
+    const remain = Math.max(0, 162 - dW - dL);
     const magic = ahead==='Even' ? null : Math.max(0, Math.ceil(163 - (ahead==='Dodgers' ? (dW + pL) : (pW + dL))));
     const width = 50 + (diff ? (ahead==='Dodgers' ? diff : -diff) : 0)*5;
     return `
@@ -151,13 +156,13 @@
         <div class="bar"><div class="fill" style="width:${width}%"></div></div>
         <div class="stats">
           <div>${ahead==='Even' ? 'Even' : ahead + ' lead'} by ${diff.toFixed(1)} games</div>
-          <div>${magic!=null ? 'Magic number: ' + magic : 'Games remaining: ' + dRemain}</div>
+          <div>${magic!=null ? 'Magic number: ' + magic : 'Games remaining: ' + remain}</div>
         </div>
       </div>
     `;
   }
 
-  document.querySelector(".body").innerHTML = race() + table();
+  document.querySelector('.body').innerHTML = race() + table();
 })();
 </script>
 </html>
