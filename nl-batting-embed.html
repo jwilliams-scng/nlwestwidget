@@ -1,176 +1,261 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SCNG • NL Batting Title (Qualified)</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SCNG • NL Batting Title (Qualified)</title>
 
-<style>
-  :root{color-scheme:light only}
-  html,body{margin:0;padding:0}
-  body{padding:12px;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#fff;overflow-x:hidden}
-  .wrap{max-width:740px;margin:0 auto}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden}
-  header{display:flex;justify-content:space-between;align-items:center;padding:12px;background:linear-gradient(90deg,var(--p,#0d47a1),var(--a,#1976d2));color:#fff}
-  header h3{margin:0;font-size:16px;letter-spacing:.2px;font-weight:800}
-  header .meta{font-size:12px;opacity:.95}
-  .body{padding:12px}
-  .note{font-size:12px;color:#6b7280;margin:6px 0 12px}
-  table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;vertical-align:middle}
-  th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;background:#fafafa;position:sticky;top:0}
-  tbody tr:nth-child(even){background:#f6f7f9}
-  tbody tr.leader{background:#fff7cc}
-  td.num{font-variant-numeric:tabular-nums;text-align:right}
-  .race{padding:6px 0 12px}
-  .race .stats{display:flex;justify-content:space-between;font-size:13px;gap:12px;flex-wrap:wrap}
-  .race .bar{height:10px;background:#e5e7eb;border-radius:999px;position:relative;overflow:hidden;margin-top:6px}
-  .race .fill{position:absolute;top:0;bottom:0;width:50%;background:#fff;opacity:.7;transition:width .3s ease}
-  @media (max-width:480px){ th.hide-sm, td.hide-sm { display:none; } }
-</style>
+  <style>
+    :root { color-scheme: light only; }
 
-<div class="wrap">
-  <div class="card">
-    <header>
-      <h3>NL Batting Title (Qualified)</h3>
-      <div class="meta"></div>
-    </header>
-    <div class="body">
-      <div class="race" id="race"></div>
+    html, body { margin: 0; padding: 0; }
+    body {
+      padding: 12px;
+      font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #fff;
+      overflow-x: hidden; /* no sideways scroll */
+    }
 
-      <table aria-label="NL batting title leaderboard">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Team / Player</th>
-            <th class="num">AVG</th>
-            <th class="num hide-sm">H</th>
-            <th class="num hide-sm">AB</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td colspan="5" class="note">Loading leaders…</td></tr>
-        </tbody>
-      </table>
+    .wrap { max-width: 740px; margin: 0 auto; }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
 
-      <div class="note" id="asof"></div>
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: linear-gradient(90deg, var(--p, #0d47a1), var(--a, #1976d2));
+      color: #fff;
+    }
+    header h3 { margin: 0; font-size: 16px; letter-spacing: .2px; font-weight: 800; }
+    header .meta { font-size: 12px; opacity: .95; }
+
+    .body { padding: 12px; }
+    .note { font-size: 12px; color: #6b7280; margin: 6px 0 12px; }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #6b7280;
+      background: #fafafa;
+      position: sticky;
+      top: 0;
+    }
+    tbody tr:nth-child(even) { background: #f6f7f9; }
+    tbody tr.leader { background: #fff7cc; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .race { padding: 6px 0 12px; }
+    .race .labels { display: flex; justify-content: space-between; font-size: 13px; }
+    .race .bar {
+      height: 10px; background: #e5e7eb; border-radius: 999px;
+      position: relative; overflow: hidden; margin: 6px 0;
+    }
+    .race .fill {
+      position: absolute; top: 0; bottom: 0; width: 50%;
+      background: #fff; opacity: .7; transition: width .3s ease;
+    }
+
+    @media (max-width: 480px) {
+      th.hide-sm, td.hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h3>NL Batting Title (Qualified)</h3>
+        <div class="meta"></div>
+      </header>
+
+      <div class="body">
+        <!-- Leader vs #2 strip -->
+        <div class="race" id="race">
+          <div class="labels"><div id="l1"></div><div id="l2"></div></div>
+          <div class="bar"><div class="fill" id="bar"></div></div>
+          <div class="labels"><div id="lead"></div><div>Qualified hitters • NL</div></div>
+        </div>
+
+        <!-- Top 10 table -->
+        <table aria-label="NL batting title leaderboard">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th>Team</th>
+              <th class="num">AVG</th>
+              <th class="num hide-sm">H</th>
+              <th class="num hide-sm">AB</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="6" class="note">Loading leaders…</td></tr>
+          </tbody>
+        </table>
+
+        <div class="note" id="asof"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-(async () => {
-  // ---- branding (same map as standings) ----
-  const brands = {
-    'dailynews.com':['#0d47a1','#1976d2'],
-    'ocregister.com':['#0b3d91','#1e88e5'],
-    'sgvtribune.com':['#334155','#64748b'],
-    'dailybreeze.com':['#0f766e','#14b8a6'],
-    'presstelegram.com':['#1f2937','#4b5563'],
-    'sbsun.com':['#7c2d12','#ea580c'],
-    'dailybulletin.com':['#3b0764','#7c3aed'],
-    'pasadenastarnews.com':['#111827','#374151'],
-    'whittierdailynews.com':['#27272a','#52525b'],
-    'dailypilot.com':['#1e3a8a','#2563eb'],
-  };
-  const qs = new URLSearchParams(location.search);
-  const force = (qs.get('brand')||'').toLowerCase();
-  let host = '';
-  try { host = new URL(document.referrer).hostname.toLowerCase().replace(/^www\./,''); } catch(e){}
-  const mapCode = {
-    ladn:'dailynews.com', ocr:'ocregister.com', sgv:'sgvtribune.com', db:'dailybreeze.com', pt:'presstelegram.com',
-    sbs:'sbsun.com', ivdb:'dailybulletin.com', psn:'pasadenastarnews.com', wdn:'whittierdailynews.com', dp:'dailypilot.com'
-  }[force];
-  const [p,a] = brands[mapCode || host] || ['#0d47a1','#1976d2'];
-  document.documentElement.style.setProperty('--p', p);
-  document.documentElement.style.setProperty('--a', a);
+  <script>
+    (async () => {
+      /* ---------- Branding (same approach as your standings card) ---------- */
+      const brandMap = {
+        'dailynews.com': 'ladn',
+        'ocregister.com': 'ocr',
+        'sgvtribune.com': 'sgv',
+        'dailybreeze.com': 'db',
+        'presstelegram.com': 'pt',
+        'sbsun.com': 'sbs',
+        'dailybulletin.com': 'ivdb',
+        'pasadenastarnews.com': 'psn',
+        'whittierdailynews.com': 'wdn',
+        'dailypilot.com': 'dp'
+      };
+      const brandColors = {
+        ladn: ['#0d47a1', '#1976d2'],
+        ocr:  ['#0b3d91', '#1e88e5'],
+        sgv:  ['#334155', '#64748b'],
+        db:   ['#0f766e', '#14b8a6'],
+        pt:   ['#1f2937', '#4b5563'],
+        sbs:  ['#7c2d12', '#ea580c'],
+        ivdb: ['#3b0764', '#7c3aed'],
+        psn:  ['#111827', '#374151'],
+        wdn:  ['#27272a', '#52525b'],
+        dp:   ['#1e3a8a', '#2563eb'],
+        default: ['#0d47a1', '#1976d2']
+      };
 
-  // ---- header meta ----
-  const meta = document.querySelector('.meta');
-  const now = new Date();
-  const season = (now.getUTCMonth()+1)<=2 ? now.getUTCFullYear()-1 : now.getUTCFullYear();
-  meta.textContent = `${season} • Updated ${now.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})}`;
+      const qsBrand = (new URLSearchParams(location.search).get('brand') || '').toLowerCase();
+      let host = '';
+      try { host = new URL(document.referrer).hostname.toLowerCase().replace(/^www\./, ''); } catch (e) {}
+      const brand = qsBrand || brandMap[host] || 'default';
+      const [p, a] = brandColors[brand] || brandColors.default;
+      document.documentElement.style.setProperty('--p', p);
+      document.documentElement.style.setProperty('--a', a);
 
-  const rowsEl = document.getElementById('rows');
-  const raceEl = document.getElementById('race');
-  const asofEl = document.getElementById('asof');
-  const pct = n => (isFinite(n) ? Number(n).toFixed(3).replace(/^0/,'') : '—');
+      /* ---------- Header meta ---------- */
+      const meta = document.querySelector('.meta');
+      const now = new Date();
+      const season = (now.getUTCMonth() + 1) <= 2 ? now.getUTCFullYear() - 1 : now.getUTCFullYear();
+      meta.textContent = `${season} • Updated ${now.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })}`;
 
-  // ---- data (primary + fallback) ----
-  async function fromLeagueLeaders() {
-    const u = `https://statsapi.mlb.com/api/v1/leagueLeaders?leaderCategories=avg&season=${season}&leaderGameTypes=R&playerPool=Qualified&leagueId=104&limit=15&hydrate=person,team`;
-    const r = await fetch(u, {mode:'cors', cache:'no-store'});
-    if (!r.ok) return [];
-    const j = await r.json();
-    const arr = j?.leagueLeaders?.[0]?.leaders || [];
-    return arr.map((x,i)=>({
-      rank:i+1,
-      name:x?.person?.fullName||'—',
-      team:x?.team?.abbreviation||x?.team?.teamCode||'—',
-      avg:parseFloat(x?.value||0),
-      hits:+x?.hits||0,
-      ab:+x?.atBats||0
-    }));
-  }
-  async function fromStats() {
-    const base = `https://statsapi.mlb.com/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&leagueId=104&playerPool=Qualified&gameType=R&limit=15&hydrate=person(team)`;
-    const urls = [base+`&order=desc&sortStat=avg`, base+`&order=desc&sortStat=battingAverage`];
-    for (const u of urls) {
-      const r = await fetch(u, {mode:'cors', cache:'no-store'});
-      if (!r.ok) continue;
-      const j = await r.json();
-      const s = j?.stats?.[0]?.splits||[];
-      if (s.length) {
-        return s.map((x,i)=>({
-          rank:i+1,
-          name:x?.player?.fullName||x?.person?.fullName||'—',
-          team:x?.team?.abbreviation||x?.team?.teamCode||'—',
-          avg:parseFloat(x?.stat?.avg ?? x?.stat?.battingAverage ?? 0),
-          hits:+x?.stat?.hits||0,
-          ab:+x?.stat?.atBats||0
-        }));
+      /* ---------- Elements ---------- */
+      const rowsEl  = document.getElementById('rows');
+      const l1      = document.getElementById('l1');
+      const l2      = document.getElementById('l2');
+      const bar     = document.getElementById('bar');
+      const leadEl  = document.getElementById('lead');
+      const asofEl  = document.getElementById('asof');
+
+      /* ---------- Helpers ---------- */
+      const pct = (n) => (isFinite(n) ? Number(n).toFixed(3).replace(/^0/, '') : '—');
+
+      // Team ID → abbreviation (prevents em dashes)
+      const TEAM = {
+        108:'LAA',109:'ARI',110:'BAL',111:'BOS',112:'CHC',113:'CIN',114:'CLE',115:'COL',116:'DET',117:'HOU',
+        118:'KC',119:'LAD',120:'WSH',121:'NYM',133:'OAK',134:'PIT',135:'SD',136:'SEA',137:'SF',138:'STL',
+        139:'TB',140:'TEX',141:'TOR',142:'MIN',143:'PHI',144:'ATL',145:'CWS',146:'MIA',147:'NYY',158:'MIL'
+      };
+
+      /* ---------- Data: primary (stats) + fallback (leagueLeaders) ---------- */
+      async function fetchFromStats() {
+        const base = `https://statsapi.mlb.com/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&leagueId=104&playerPool=Qualified&gameType=R&limit=12&hydrate=person,team`;
+        const urls = [ base + `&order=desc&sortStat=battingAverage`, base + `&order=desc&sortStat=avg` ];
+        for (const u of urls) {
+          const r = await fetch(u, { mode: 'cors', cache: 'no-store' });
+          if (!r.ok) continue;
+          const j = await r.json();
+          const s = j?.stats?.[0]?.splits || [];
+          if (!s.length) continue;
+          return s.map((x, i) => {
+            const tid = x?.team?.id || x?.player?.currentTeam?.id || x?.person?.currentTeam?.id;
+            return {
+              rank: i + 1,
+              name: x?.player?.fullName || x?.person?.fullName || '',
+              team: TEAM[tid] || x?.team?.abbreviation || x?.team?.teamCode || '',
+              avg:  parseFloat(x?.stat?.avg ?? x?.stat?.battingAverage ?? 0),
+              hits: +x?.stat?.hits || 0,
+              ab:   +x?.stat?.atBats || 0
+            };
+          });
+        }
+        return [];
       }
-    }
-    return [];
-  }
 
-  let leaders = [];
-  try { leaders = await fromLeagueLeaders(); } catch(_) {}
-  if (!leaders.length) { try { leaders = await fromStats(); } catch(_) {} }
-  leaders = leaders.slice(0,10); // top 10 only
+      async function fetchFromLeaders() {
+        const u = `https://statsapi.mlb.com/api/v1/leagueLeaders?leaderCategories=avg&season=${season}&leaderGameTypes=R&playerPool=Qualified&leagueId=104&limit=12&hydrate=person,team`;
+        const r = await fetch(u, { mode: 'cors', cache: 'no-store' });
+        if (!r.ok) return [];
+        const j = await r.json();
+        const a = j?.leagueLeaders?.[0]?.leaders || [];
+        return a.map((x, i) => {
+          const tid = x?.team?.id || x?.person?.currentTeam?.id;
+          return {
+            rank: i + 1,
+            name: x?.person?.fullName || '',
+            team: TEAM[tid] || x?.team?.abbreviation || x?.team?.teamCode || '',
+            avg:  parseFloat(x?.value || 0),
+            hits: +x?.hits || 0,
+            ab:   +x?.atBats || 0
+          };
+        });
+      }
 
-  if (!leaders.length) {
-    rowsEl.innerHTML = `<tr><td colspan="5" class="note">Leaders temporarily unavailable.</td></tr>`;
-    asofEl.textContent = '';
-    return;
-  }
+      let leaders = [];
+      try { leaders = await fetchFromStats(); } catch (_) {}
+      if (!leaders.length) { try { leaders = await fetchFromLeaders(); } catch (_) {} }
+      leaders = leaders.slice(0, 10); // top 10 only
 
-  // ---- race strip (leader vs #2) ----
-  const [one,two] = leaders;
-  const diff = (one.avg - two.avg);
-  const width = 50 + Math.max(-4, Math.min(4, diff * 1000)) * 5; // clamp so bar stays inside
-  raceEl.innerHTML = `
-    <div class="stats">
-      <div><strong>${one.name.split(' ').slice(-1)[0]}</strong> ${pct(one.avg)}</div>
-      <div><strong>#2</strong> ${pct(two.avg)}</div>
-    </div>
-    <div class="bar"><div class="fill" style="width:${width}%"></div></div>
-    <div class="stats" style="margin-top:6px"><div>Lead: ${pct(diff)}</div><div>Qualified hitters • NL</div></div>
-  `;
+      if (!leaders.length) {
+        rowsEl.innerHTML = `<tr><td colspan="6" class="note">Leaders temporarily unavailable.</td></tr>`;
+        asofEl.textContent = '';
+        return;
+      }
 
-  // ---- table ----
-  rowsEl.innerHTML = leaders.map(r => `
-    <tr class="${r.rank===1?'leader':''}">
-      <td>${r.rank}</td>
-      <td><strong>${r.team}</strong> — ${r.name}</td>
-      <td class="num">${pct(r.avg)}</td>
-      <td class="num hide-sm">${r.hits}</td>
-      <td class="num hide-sm">${r.ab}</td>
-    </tr>`).join('');
+      /* ---------- Race strip (leader vs #2) ---------- */
+      const [one, two] = leaders;
+      l1.textContent = `${one.name.split(' ').slice(-1)[0]} ${pct(one.avg)}`;
+      l2.textContent = `#2 ${pct(two.avg)}`;
+      const diff = one.avg - two.avg;
+      // Clamp to keep the bar inside (±4 “points” of AVG)
+      bar.style.width = (50 + Math.max(-4, Math.min(4, diff * 1000)) * 5) + '%';
+      leadEl.textContent = `Lead: ${pct(diff)}`;
 
-  // ---- footer note ----
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Los_Angeles';
-  const fmt = new Intl.DateTimeFormat('en-US',{dateStyle:'medium',timeStyle:'short',timeZone:tz});
-  asofEl.textContent = `As of ${fmt.format(now)} • Regular season • NL (Qualified)`;
-})();
-</script>
+      /* ---------- Table ---------- */
+      rowsEl.innerHTML = leaders.map(r => `
+        <tr class="${r.rank === 1 ? 'leader' : ''}">
+          <td>${r.rank}</td>
+          <td>${r.name}</td>
+          <td>${r.team || ''}</td>
+          <td class="num">${pct(r.avg)}</td>
+          <td class="num hide-sm">${r.hits}</td>
+          <td class="num hide-sm">${r.ab}</td>
+        </tr>
+      `).join('');
+
+      /* ---------- Footer note ---------- */
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Los_Angeles';
+      const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: tz });
+      asofEl.textContent = `As of ${fmt.format(now)} • Regular season • NL (Qualified)`;
+    })();
+  </script>
+</body>
 </html>
