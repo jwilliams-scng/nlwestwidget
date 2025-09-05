@@ -71,6 +71,9 @@
       background: #fff; opacity: .7; transition: width .3s ease;
     }
 
+    /* New bottom divider under the table */
+    .table-bottom { height: 1px; background: #e5e7eb; }
+
     @media (max-width: 480px) {
       th.hide-sm, td.hide-sm { display: none; }
     }
@@ -108,6 +111,9 @@
             <tr><td colspan="6" class="note">Loading leaders…</td></tr>
           </tbody>
         </table>
+
+        <!-- Bottom border line under the table -->
+        <div class="table-bottom"></div>
 
         <div class="note" id="asof"></div>
       </div>
