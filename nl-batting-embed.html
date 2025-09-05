@@ -58,6 +58,101 @@
 
 <script>
 (async () => {
-  // --- Auto-brand: detect parent domain via referrer; fallback to ?brand= ---
-  co
+  // --- Auto-brand by parent site (or ?brand= override) ---
+  const brandMap = {
+    'dailynews.com':'ladn','ocregister.com':'ocr','sgvtribune.com':'sgv','dailybreeze.com':'db',
+    'presstelegram.com':'pt','sbsun.com':'sbs','dailybulletin.com':'ivdb','pasadenastarnews.com':'psn',
+    'whittierdailynews.com':'wdn','dailypilot.com':'dp'
+  };
+  const brandColors = {
+    ladn:['#0d47a1','#1976d2'], ocr:['#0b3d91','#1e88e5'], sgv:['#334155','#64748b'],
+    db:['#0f766e','#14b8a6'],   pt:['#1f2937','#4b5563'],   sbs:['#7c2d12','#ea580c'],
+    ivdb:['#3b0764','#7c3aed'], psn:['#111827','#374151'], wdn:['#27272a','#52525b'],
+    dp:['#1e3a8a','#2563eb'],  default:['#0d47a1','#1976d2']
+  };
+  const qs = new URLSearchParams(location.search);
+  const qsBrand = (qs.get('brand') || '').toLowerCase();
+  let host=''; try{ host=new URL(document.referrer).hostname.toLowerCase().replace(/^www\./,''); }catch(e){}
+  const [p,a] = (brandColors[qsBrand || brandMap[host] || 'default'] || brandColors.default);
+  document.documentElement.style.setProperty('--p', p);
+  document.documentElement.style.setProperty('--a', a);
 
+  // --- Header meta ---
+  const meta = document.querySelector('.meta');
+  const now = new Date();
+  const season = ((m)=> m<=2 ? now.getUTCFullYear()-1 : now.getUTCFullYear())(now.getUTCMonth()+1);
+  meta.textContent = `${season} • Updated ${now.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})}`;
+
+  const rowsEl = document.getElementById('rows');
+  const raceEl = document.getElementById('race');
+  const asofEl = document.getElementById('asof');
+
+  // --- Fetch qualified NL hitters sorted by AVG (robust: primary + fallback) ---
+  async function getLeaders() {
+    const urls = [
+      // primary
+      `https://statsapi.mlb.com/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&leagueId=104&playerPool=Qualified&gameType=R&order=desc&sortStat=avg&limit=10&hydrate=person(team)`,
+      // fallback (some mirrors use battingAverage)
+      `https://statsapi.mlb.com/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&leagueId=104&playerPool=Qualified&gameType=R&order=desc&sortStat=battingAverage&limit=10&hydrate=person(team)`
+    ];
+    for (const u of urls) {
+      try {
+        const r = await fetch(u, {mode:'cors', cache:'no-store'});
+        if (!r.ok) continue;
+        const data = await r.json();
+        const splits = (data?.stats?.[0]?.splits) || [];
+        if (splits.length) {
+          return splits.map((s,i)=>({
+            rank: i+1,
+            name: s?.player?.fullName || s?.person?.fullName || '—',
+            team: s?.team?.abbreviation || s?.team?.teamCode || '—',
+            avg: parseFloat(s?.stat?.avg ?? s?.stat?.battingAverage ?? 0),
+            hits: +s?.stat?.hits || 0,
+            ab: +s?.stat?.atBats || 0
+          }));
+        }
+      } catch(_) {}
+    }
+    return [];
+  }
+
+  const leaders = await getLeaders();
+
+  if (!leaders.length) {
+    rowsEl.innerHTML = `<tr><td colspan="6" class="note">Leaders temporarily unavailable.</td></tr>`;
+    asofEl.textContent = '';
+    return;
+  }
+
+  // --- Race strip (leader vs #2) ---
+  const [one, two] = leaders;
+  const diff = (one.avg - two.avg);
+  const pct = n => (isFinite(n) ? n.toFixed(3).replace(/^0/, '') : '—');
+  const width = 50 + Math.max(-4, Math.min(4, diff * 1000)) * 5; // clamp ±4 "points"
+  raceEl.innerHTML = `
+    <div class="stats">
+      <div><strong>${one.name.split(' ').slice(-1)[0]}</strong> ${pct(one.avg)}</div>
+      <div><strong>#2</strong> ${pct(two.avg)}</div>
+    </div>
+    <div class="bar"><div class="fill" style="width:${width}%"></div></div>
+    <div class="stats" style="margin-top:6px"><div>Lead: ${pct(diff)}</div><div>Qualified hitters • NL</div></div>
+  `;
+
+  // --- Table ---
+  rowsEl.innerHTML = leaders.map(r => `
+    <tr class="${r.rank===1?'leader':''}">
+      <td>${r.rank}</td>
+      <td>${r.name}</td>
+      <td class="hide-sm">${r.team}</td>
+      <td class="num">${pct(r.avg)}</td>
+      <td class="num hide-sm">${r.hits}</td>
+      <td class="num hide-sm">${r.ab}</td>
+    </tr>`).join('');
+
+  // --- Footer note ---
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Los_Angeles';
+  const fmt = new Intl.DateTimeFormat('en-US',{dateStyle:'medium', timeStyle:'short', timeZone:tz});
+  asofEl.textContent = `As of ${fmt.format(now)} • Regular season • NL (Qualified)`;
+})();
+</script>
+</html>
