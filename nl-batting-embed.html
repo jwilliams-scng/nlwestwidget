@@ -3,62 +3,90 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SCNG • NL Batting Title (Qualified / Near-Qualifiers)</title>
+  <title>SCNG • NL Batting Title (Qualified)</title>
 
   <style>
     :root { color-scheme: light only; }
-    html, body { margin:0; padding:0; }
+    html, body { margin: 0; padding: 0; }
     body {
-      padding:12px;
-      font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background:#fff;
-      overflow-x:hidden;
+      padding: 12px;
+      font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #fff;
+      overflow-x: hidden;
     }
 
-    .wrap{max-width:740px;margin:0 auto}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden}
+    .wrap { max-width: 740px; margin: 0 auto; }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+      overflow: hidden;
+    }
 
-    header{display:flex;justify-content:space-between;align-items:center;padding:12px;background:linear-gradient(90deg,var(--p,#0d47a1),var(--a,#1976d2));color:#fff}
-    header h3{margin:0;font-size:16px;letter-spacing:.2px;font-weight:800}
-    header .meta{font-size:12px;opacity:.95}
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px;
+      background: linear-gradient(90deg, var(--p, #0d47a1), var(--a, #1976d2));
+      color: #fff;
+    }
+    header h3 { margin: 0; font-size: 16px; letter-spacing: .2px; font-weight: 800; }
+    header .meta { font-size: 12px; opacity: .95; }
 
-    .body{padding:12px}
-    .note{font-size:12px;color:#6b7280;margin:6px 0 12px}
+    .body { padding: 12px; }
+    .note { font-size: 12px; color: #6b7280; margin: 6px 0 12px; }
 
-    table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;border-bottom:1px solid #e5e7eb}
-    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;vertical-align:middle;white-space:nowrap}
-    tbody tr:last-child td{border-bottom:0}
-    th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;background:#fafafa;position:sticky;top:0}
-    tbody tr:nth-child(even){background:#f6f7f9}
-    tbody tr.leader{background:#fff7cc}
-    td.num{text-align:right;font-variant-numeric:tabular-nums}
+    table {
+      width: 100%;
+      border-collapse: separate; border-spacing: 0; font-size: 14px;
+      border-bottom: 1px solid #e5e7eb;           /* guaranteed bottom border */
+    }
+    th, td {
+      padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle; white-space: nowrap;
+    }
+    tbody tr:last-child td { border-bottom: 0; }   /* avoid double line */
+    th {
+      font-size: 12px; text-transform: uppercase; letter-spacing: .06em;
+      color: #6b7280; background: #fafafa; position: sticky; top: 0;
+    }
+    tbody tr:nth-child(even) { background: #f6f7f9; }
+    tbody tr.leader { background: #fff7cc; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
 
-    .race{padding:6px 0 12px}
-    .race .labels{display:flex;justify-content:space-between;font-size:13px}
-    .race .bar{height:10px;background:#e5e7eb;border-radius:999px;position:relative;overflow:hidden;margin:6px 0}
-    .race .fill{position:absolute;top:0;bottom:0;width:50%;background:#fff;opacity:.7;transition:width .3s ease}
+    .race { padding: 6px 0 12px; }
+    .race .labels { display: flex; justify-content: space-between; font-size: 13px; }
+    .race .bar {
+      height: 10px; background: #e5e7eb; border-radius: 999px;
+      position: relative; overflow: hidden; margin: 6px 0;
+    }
+    .race .fill {
+      position: absolute; top: 0; bottom: 0; width: 50%;
+      background: #fff; opacity: .7; transition: width .3s ease;
+    }
 
-    .badge{display:inline-block;margin-left:6px;padding:2px 6px;font-size:11px;border-radius:999px;border:1px solid #e5e7eb;background:#eef2f7;color:#475569}
-    .badge.nq{background:#fff3f3;color:#b91c1c;border-color:#f3d6d6}
-
-    @media (max-width:480px){th.hide-sm,td.hide-sm{display:none}}
+    @media (max-width: 480px) {
+      th.hide-sm, td.hide-sm { display: none; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <header>
-        <h3>NL Batting Title <span id="modeLabel" style="font-weight:600"></span></h3>
+        <h3>NL Batting Title (Qualified)</h3>
         <div class="meta"></div>
       </header>
 
       <div class="body">
+        <!-- Leader vs #2 strip -->
         <div class="race" id="race">
           <div class="labels"><div id="l1"></div><div id="l2"></div></div>
           <div class="bar"><div class="fill" id="bar"></div></div>
-          <div class="labels"><div id="lead"></div><div id="qualNote">Qualified hitters • NL</div></div>
+          <div class="labels"><div id="lead"></div><div>Qualified hitters • NL</div></div>
         </div>
 
+        <!-- Top 10 table -->
         <table aria-label="NL batting title leaderboard">
           <thead>
             <tr>
@@ -81,155 +109,131 @@
   </div>
 
   <script>
-  (async () => {
-    /* ---------- Branding ---------- */
-    const brandMap = {
-      'dailynews.com':'ladn','ocregister.com':'ocr','sgvtribune.com':'sgv','dailybreeze.com':'db',
-      'presstelegram.com':'pt','sbsun.com':'sbs','dailybulletin.com':'ivdb','pasadenastarnews.com':'psn',
-      'whittierdailynews.com':'wdn','dailypilot.com':'dp'
-    };
-    const brandColors = {
-      ladn:['#0d47a1','#1976d2'], ocr:['#0b3d91','#1e88e5'], sgv:['#334155','#64748b'],
-      db:['#0f766e','#14b8a6'], pt:['#1f2937','#4b5563'], sbs:['#7c2d12','#ea580c'],
-      ivdb:['#3b0764','#7c3aed'], psn:['#111827','#374151'], wdn:['#27272a','#52525b'],
-      dp:['#1e3a8a','#2563eb'], default:['#0d47a1','#1976d2']
-    };
-    const qs = new URLSearchParams(location.search);
-    const qsBrand = (qs.get('brand')||'').toLowerCase();
-    let host=''; try{ host=new URL(document.referrer).hostname.toLowerCase().replace(/^www\./,''); }catch(e){}
-    const [p,a] = (brandColors[qsBrand || brandMap[host] || 'default'] || brandColors.default);
-    document.documentElement.style.setProperty('--p', p);
-    document.documentElement.style.setProperty('--a', a);
+    (async () => {
+      /* ---------- Branding ---------- */
+      const brandMap = {
+        'dailynews.com':'ladn','ocregister.com':'ocr','sgvtribune.com':'sgv','dailybreeze.com':'db',
+        'presstelegram.com':'pt','sbsun.com':'sbs','dailybulletin.com':'ivdb','pasadenastarnews.com':'psn',
+        'whittierdailynews.com':'wdn','dailypilot.com':'dp'
+      };
+      const brandColors = {
+        ladn:['#0d47a1','#1976d2'], ocr:['#0b3d91','#1e88e5'], sgv:['#334155','#64748b'],
+        db:['#0f766e','#14b8a6'], pt:['#1f2937','#4b5563'], sbs:['#7c2d12','#ea580c'],
+        ivdb:['#3b0764','#7c3aed'], psn:['#111827','#374151'], wdn:['#27272a','#52525b'],
+        dp:['#1e3a8a','#2563eb'], default:['#0d47a1','#1976d2']
+      };
+      const qs = new URLSearchParams(location.search);
+      const qsBrand = (qs.get('brand') || '').toLowerCase();
+      let host = ''; try { host = new URL(document.referrer).hostname.toLowerCase().replace(/^www\./,''); } catch(e){}
+      const [p,a] = (brandColors[qsBrand || brandMap[host] || 'default'] || brandColors.default);
+      document.documentElement.style.setProperty('--p', p);
+      document.documentElement.style.setProperty('--a', a);
 
-    /* ---------- Params ---------- */
-    const minPA = Math.max(0, Number(qs.get('minPA')||NaN)) || null; // null => Qualified only
-    const includeNames = (qs.get('include')||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-    document.getElementById('modeLabel').textContent = minPA ? `(≥ ${minPA} PA)` : '(Qualified)';
+      /* ---------- Meta ---------- */
+      const meta = document.querySelector('.meta');
+      const now = new Date();
+      const season = (now.getUTCMonth()+1)<=2 ? now.getUTCFullYear()-1 : now.getUTCFullYear();
+      meta.textContent = `${season} • Updated ${now.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})}`;
 
-    /* ---------- Meta ---------- */
-    const meta = document.querySelector('.meta');
-    const now = new Date();
-    const season = (now.getUTCMonth()+1)<=2 ? now.getUTCFullYear()-1 : now.getUTCFullYear();
-    meta.textContent = `${season} • Updated ${now.toLocaleString(undefined,{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'})}`;
+      /* ---------- Elements ---------- */
+      const rowsEl = document.getElementById('rows');
+      const l1 = document.getElementById('l1');
+      const l2 = document.getElementById('l2');
+      const bar = document.getElementById('bar');
+      const leadEl = document.getElementById('lead');
+      const asofEl = document.getElementById('asof');
 
-    const rowsEl = document.getElementById('rows');
-    const l1 = document.getElementById('l1');
-    const l2 = document.getElementById('l2');
-    const bar = document.getElementById('bar');
-    const leadEl = document.getElementById('lead');
-    const qualNote = document.getElementById('qualNote');
-    const asofEl = document.getElementById('asof');
+      const pct = n => (isFinite(n) ? Number(n).toFixed(3).replace(/^0/,'') : '—');
 
-    const pct = n => (isFinite(n) ? Number(n).toFixed(3).replace(/^0/,'') : '—');
-    const TEAM = {
-      108:'LAA',109:'ARI',110:'BAL',111:'BOS',112:'CHC',113:'CIN',114:'CLE',115:'COL',116:'DET',117:'HOU',
-      118:'KC',119:'LAD',120:'WSH',121:'NYM',133:'OAK',134:'PIT',135:'SD',136:'SEA',137:'SF',138:'STL',
-      139:'TB',140:'TEX',141:'TOR',142:'MIN',143:'PHI',144:'ATL',145:'CWS',146:'MIA',147:'NYY',158:'MIL'
-    };
+      // Team ID → abbreviation (prevents em dashes)
+      const TEAM = {
+        108:'LAA',109:'ARI',110:'BAL',111:'BOS',112:'CHC',113:'CIN',114:'CLE',115:'COL',116:'DET',117:'HOU',
+        118:'KC',119:'LAD',120:'WSH',121:'NYM',133:'OAK',134:'PIT',135:'SD',136:'SEA',137:'SF',138:'STL',
+        139:'TB',140:'TEX',141:'TOR',142:'MIN',143:'PHI',144:'ATL',145:'CWS',146:'MIA',147:'NYY',158:'MIL'
+      };
 
-    /* ---------- Official cutoff (3.1 × NL games) ---------- */
-    async function getOfficialCutoff() {
-      try {
-        const u = `https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=${season}&standingsTypes=byLeague`;
-        const r = await fetch(u, {mode:'cors', cache:'no-store'});
-        if (!r.ok) throw 0;
-        const j = await r.json();
-        const recs = j?.records?.[0]?.teamRecords || [];
-        const maxGames = recs.reduce((m,t)=>Math.max(m, t?.gamesPlayed||0), 0);
-        return Math.ceil(3.1 * maxGames) || 502;
-      } catch { return 502; }
-    }
-    const officialCutoff = await getOfficialCutoff();
-    if (minPA) qualNote.textContent = `NL • Showing hitters with ≥ ${minPA} PA (NQ = below official cutoff ${officialCutoff})`;
-
-    /* ---------- Fetch ALL NL hitters, then filter ---------- */
-    async function fetchAllPlayers(limit=600){
-      const base = `https://statsapi.mlb.com/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&leagueId=104&playerPool=AllPlayers&gameType=R&hydrate=person,team`;
-      const urls = [
-        `${base}&order=desc&sortStat=battingAverage&limit=${limit}`,
-        `${base}&order=desc&sortStat=avg&limit=${limit}`
-      ];
-      for (const u of urls){
-        const r = await fetch(u, {mode:'cors', cache:'no-store'});
-        if (!r.ok) continue;
-        const j = await r.json();
-        const s = j?.stats?.[0]?.splits || [];
-        if (!s.length) continue;
-        return s.map(x=>{
-          const tid = x?.team?.id || x?.player?.currentTeam?.id || x?.person?.currentTeam?.id;
-          const st  = x?.stat || {};
-          const pa  = +st?.plateAppearances ||
-                      ((+st?.atBats||0)+(+st?.baseOnBalls||0)+(+st?.hitByPitch||0)+(+st?.sacBunts||0)+(+st?.sacFlies||0));
-          return {
-            name: x?.player?.fullName || x?.person?.fullName || '',
-            team: TEAM[tid] || x?.team?.abbreviation || x?.team?.teamCode || '',
-            avg:  parseFloat(st?.avg ?? st?.battingAverage ?? 0),
-            hits: +st?.hits || 0,
-            ab:   +st?.atBats || 0,
-            pa
-          };
-        });
+      /* ---------- Data fetchers (Qualified only) ---------- */
+      async function fetchFromStatsQualified(limit=50) {
+        const base = `https://statsapi.mlb.com/api/v1/stats?stats=season&group=hitting&season=${season}&sportId=1&leagueId=104&playerPool=Qualified&gameType=R&hydrate=person,team`;
+        const urls = [
+          `${base}&order=desc&sortStat=battingAverage&limit=${limit}`,
+          `${base}&order=desc&sortStat=avg&limit=${limit}`
+        ];
+        for (const u of urls) {
+          const r = await fetch(u, {mode:'cors', cache:'no-store'});
+          if (!r.ok) continue;
+          const j = await r.json();
+          const s = j?.stats?.[0]?.splits || [];
+          if (!s.length) continue;
+          return s.map((x,i)=>{
+            const tid = x?.team?.id || x?.player?.currentTeam?.id || x?.person?.currentTeam?.id;
+            const st  = x?.stat || {};
+            return {
+              rank: i+1,
+              name: x?.player?.fullName || x?.person?.fullName || '',
+              team: TEAM[tid] || x?.team?.abbreviation || x?.team?.teamCode || '',
+              avg:  parseFloat(st?.avg ?? st?.battingAverage ?? 0),
+              hits: +st?.hits || 0,
+              ab:   +st?.atBats || 0
+            };
+          });
+        }
+        return [];
       }
-      return [];
-    }
 
-    let list = [];
-    try { list = await fetchAllPlayers(); } catch {}
+      async function fetchFromLeadersQualified() {
+        const u = `https://statsapi.mlb.com/api/v1/leagueLeaders?leaderCategories=avg&season=${season}&leaderGameTypes=R&playerPool=Qualified&leagueId=104&limit=15&hydrate=person,team`;
+        const r = await fetch(u, {mode:'cors', cache:'no-store'});
+        if (!r.ok) return [];
+        const j = await r.json();
+        const a = j?.leagueLeaders?.[0]?.leaders || [];
+        return a.map((x,i)=>({
+          rank: i+1,
+          name: x?.person?.fullName || '',
+          team: TEAM[x?.team?.id] || x?.team?.abbreviation || x?.team?.teamCode || '',
+          avg:  parseFloat(x?.value || 0),
+          hits: +x?.hits || 0,
+          ab:   +x?.atBats || 0
+        }));
+      }
 
-    if (!list.length){
-      rowsEl.innerHTML = `<tr><td colspan="6" class="note">Leaders temporarily unavailable.</td></tr>`;
-      asofEl.textContent = '';
-      return;
-    }
+      /* ---------- Build qualified list ---------- */
+      let leaders = [];
+      try { leaders = await fetchFromStatsQualified(); } catch(_) {}
+      if (!leaders.length) { try { leaders = await fetchFromLeadersQualified(); } catch(_) {} }
+      leaders = leaders.slice(0,10);
 
-    // Base filter: hitters only
-    list = list.filter(r => r.ab > 0 && r.avg > 0);
+      if (!leaders.length) {
+        rowsEl.innerHTML = `<tr><td colspan="6" class="note">Leaders temporarily unavailable.</td></tr>`;
+        asofEl.textContent = '';
+        return;
+      }
 
-    // Apply minPA (if provided)
-    if (minPA != null) {
-      list = list.filter(r => r.pa >= minPA ||
-        includeNames.includes(r.name.toLowerCase())); // force-include
-    } else {
-      // Qualified only (official cutoff)
-      list = list.filter(r => r.pa >= officialCutoff);
-    }
+      /* ---------- Race strip ---------- */
+      const [one, two] = leaders;
+      l1.textContent = `${one.name.split(' ').slice(-1)[0]} ${pct(one.avg)}`;
+      l2.textContent = `#2 ${pct(two.avg)}`;
+      const diff = (one.avg - two.avg);
+      bar.style.width = (50 + Math.max(-4, Math.min(4, diff * 1000)) * 5) + '%';
+      leadEl.textContent = `Lead: ${pct(diff)}`;
 
-    // Sort and take top 10
-    list.sort((a,b) => (b.avg - a.avg) || (b.pa - a.pa));
-    const leaders = list.slice(0,10);
+      /* ---------- Table ---------- */
+      rowsEl.innerHTML = leaders.map((r,i)=>`
+        <tr class="${i===0?'leader':''}">
+          <td>${i+1}</td>
+          <td>${r.name}</td>
+          <td>${r.team || ''}</td>
+          <td class="num">${pct(r.avg)}</td>
+          <td class="num hide-sm">${r.hits}</td>
+          <td class="num hide-sm">${r.ab}</td>
+        </tr>
+      `).join('');
 
-    if (!leaders.length){
-      rowsEl.innerHTML = `<tr><td colspan="6" class="note">No hitters at this threshold.</td></tr>`;
-      asofEl.textContent = '';
-      return;
-    }
-
-    // Race strip
-    const [one,two] = leaders;
-    l1.textContent = `${one.name.split(' ').slice(-1)[0]} ${pct(one.avg)}`;
-    l2.textContent = `#2 ${pct(two.avg)}`;
-    const diff = (one.avg - two.avg);
-    bar.style.width = (50 + Math.max(-4, Math.min(4, diff * 1000)) * 5) + '%';
-    leadEl.textContent = `Lead: ${pct(diff)}`;
-
-    // Table
-    rowsEl.innerHTML = leaders.map((r,i)=>{
-      const nq = (r.pa < officialCutoff) ? '<span class="badge nq">NQ</span>' : '';
-      return `<tr class="${i===0?'leader':''}">
-        <td>${i+1}</td>
-        <td>${r.name}${(minPA!=null && nq)?' '+nq:''}</td>
-        <td>${r.team||''}</td>
-        <td class="num">${pct(r.avg)}</td>
-        <td class="num hide-sm">${r.hits}</td>
-        <td class="num hide-sm">${r.ab}</td>
-      </tr>`;
-    }).join('');
-
-    // Footer
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Los_Angeles';
-    const fmt = new Intl.DateTimeFormat('en-US',{dateStyle:'medium', timeStyle:'short', timeZone:tz});
-    asofEl.textContent = `As of ${fmt.format(now)} • ${minPA!=null ? '≥ '+minPA+' PA' : 'Regular season • NL (Qualified)'}${minPA!=null ? ' • Official cutoff: '+officialCutoff+' PA' : ''}`;
-  })();
+      /* ---------- Footer ---------- */
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Los_Angeles';
+      const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: tz });
+      asofEl.textContent = `As of ${fmt.format(now)} • Regular season • NL (Qualified)`;
+    })();
   </script>
 </body>
 </html>
