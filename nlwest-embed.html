@@ -9,9 +9,8 @@
     :root { color-scheme: light only; }
 
     html, body { margin:0; padding:0; }
-    /* trimmed bottom padding so there's no extra gap below the card */
     body {
-      padding: 12px 12px 0;
+      padding: 12px; /* original padding on all sides */
       font: 14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       background: #fff;
       overflow-x: hidden;
@@ -37,8 +36,6 @@
     header .meta { font-size:12px; opacity:.95; }
 
     .body { padding:12px; }
-    /* make sure the last element never pushes extra space at the bottom */
-    .body > :last-child { margin-bottom: 0; }
     .note { font-size:12px; color:#6b7280; margin:6px 0 12px; }
 
     /* race strip */
@@ -50,7 +47,7 @@
 
     /* table */
     table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px;
-            border-bottom:1px solid #e5e7eb; } /* guaranteed bottom divider */
+            border-bottom:1px solid #e5e7eb; } /* bottom divider */
     th, td {
       padding:10px 12px; text-align:left; border-bottom:1px solid #e5e7eb;
       vertical-align:middle; white-space:nowrap;
@@ -185,8 +182,8 @@
 
     // progress bar: center 50%, shift by games lead (clamped)
     const gbNum = SD.gb==='-' ? 0 : parseFloat(SD.gb);
-    const dir = (LAD.gb==='-' ? 1 : -1); // if LAD leading, shift right; else left
-    const shift = Math.max(-4, Math.min(4, (dir * gbNum))); // clamp range
+    const dir = (LAD.gb==='-' ? 1 : -1);
+    const shift = Math.max(-4, Math.min(4, (dir * gbNum)));
     fillEl.style.width = `${50 + shift * 5}%`;
 
     // magic number relative to 2nd place
